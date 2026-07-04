@@ -90,30 +90,22 @@ private final class JSCallbackStackOps[A](private val callbacks: js.Array[A => U
     bound - bound // aka 0, but so bound is not unused ...
 }
 
-private final class WasiCallbackStack[A](private var callbacks: mutable.ArrayBuffer[A => Unit])
+private final class WasiCallbackStack[A](private var callbacks: mutable.LinkedHashMap[Handle[A], A => Unit])
     extends CallbackStackOps[A] {
 
-  private val order = mutable.ArrayDeque.from(0.until(callbacks.length))
-
   @inline def push(next: A => Unit): Handle[A] = {
+
     @tailrec
-    def loop(idx: Int): Int = {
-      if (idx >= callbacks.length) {
-        callbacks.addOne(next)
-        order.prepend(idx)
-        idx
-      } else if (callbacks(idx) == null) {
-        callbacks(idx) = next
-        order.prepend(idx)
-        idx
-      } else {
-        loop(idx + 1)
+    def loop(idx: Int): Int =
+      callbacks.get(idx) match {
+        case Some(_) => loop(idx + 1)
+        case None =>
+          callbacks(idx) = next
+          idx
       }
-    }
 
     if (callbacks equals null) {
-      callbacks = mutable.ArrayBuffer(next)
-      order.prepend(0)
+      callbacks = mutable.LinkedHashMap(0 -> next)
       0
     } else {
       loop(0)
@@ -121,12 +113,9 @@ private final class WasiCallbackStack[A](private var callbacks: mutable.ArrayBuf
   }
 
   @inline def unsafeSetCallback(cb: A => Unit): Unit =
-    if (order.isEmpty) {
-      callbacks.prepend(cb)
-      order.prepend(0)
-    } else {
-      val last = order.head
-      callbacks(last) = cb
+    callbacks.lastOption match {
+      case Some((idx, _)) => callbacks(idx) = cb
+      case None => callbacks += 0 -> cb
     }
 
   /**
@@ -134,9 +123,9 @@ private final class WasiCallbackStack[A](private var callbacks: mutable.ArrayBuf
    * iff *any* callbacks were invoked.
    */
   @inline def apply(oc: A): Boolean =
-    order.foldLeft(false) { (acc, idx) =>
-      if (callbacks(idx) ne null) { callbacks(idx)(oc); true }
-      else acc
+    callbacks.foldLeft(false) { case (_, (_, cb)) =>
+      if (cb ne null) cb(oc)
+      true
     }
 
   /**
@@ -144,15 +133,12 @@ private final class WasiCallbackStack[A](private var callbacks: mutable.ArrayBuf
    * cleaned up immediately, `false` if a subsequent call to [[pack]] is required.
    */
   @inline def clearHandle(handle: Handle[A]): Boolean = {
-    callbacks(handle) = null
-    val idx = order.indexOf(handle)
-    order.remove(idx)
+    callbacks.remove(handle)
     true
   }
 
   @inline def clear(): Unit = {
     callbacks.clear()
-    order.clear()
   }
 
   @inline def pack(bound: Int): Int =
@@ -167,7 +153,7 @@ private object CallbackStackFactory {
     type StackType[A] = WasiCallbackStack[A]
 
     @inline def of[A](cb: A => Unit): StackType[A] =
-      new WasiCallbackStack(mutable.ArrayBuffer[A => Unit](cb))
+      new WasiCallbackStack(mutable.LinkedHashMap[Int, A => Unit](0 -> cb))
 
     @inline def ops[A](stack: StackType[A]): CallbackStackOps[A] =
       stack
