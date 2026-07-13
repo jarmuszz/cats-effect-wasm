@@ -35,6 +35,11 @@ private[unsafe] abstract class IORuntimeBuilderPlatform { self: IORuntimeBuilder
     val (blocking, blockingShutdown) = customBlocking.getOrElse((compute, defaultShutdown))
     val (scheduler, schedulerShutdown) =
       customScheduler.getOrElse((IORuntime.defaultScheduler, defaultShutdown))
+    val pollers = linkTimeIf(moduleKind == ModuleKind.WasmComponent) {
+      List(compute.asInstanceOf[WasiPollingExecutor])
+    } {
+      List.empty
+    }
     val shutdown = () => {
       computeShutdown()
       blockingShutdown()
@@ -47,6 +52,7 @@ private[unsafe] abstract class IORuntimeBuilderPlatform { self: IORuntimeBuilder
       computeTransform(compute),
       blockingTransform(blocking),
       scheduler,
+      pollers,
       shutdown,
       runtimeConfig
     )

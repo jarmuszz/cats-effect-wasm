@@ -215,7 +215,8 @@ trait IOApp {
         val scheduler = we.asInstanceOf[Scheduler]
         val executor = we.asInstanceOf[ExecutionContext]
 
-        IORuntime(executor, executor, scheduler, () => IORuntime.resetGlobal(), runtimeConfig)
+        val poller = we
+        IORuntime(executor, executor, scheduler, List(we), () => IORuntime.resetGlobal(), runtimeConfig)
       }
 
       _runtime = IORuntime.global
