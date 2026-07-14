@@ -17,6 +17,7 @@ final class WasiPoller(events: mutable.Queue[wasi.io.poll.Pollable]) {
       if (timeout == -1) {
         // Wait indefinitely for ready events
         readyEvents = wasi.io.poll.poll(events.toArray)
+        readyEvents.sortInPlace()(Ordering.Int.reverse)
       } else {
         // add an alarm so that we can timeout
         val alarm = wasi.clocks.monotonic_clock.subscribeDuration(timeout)

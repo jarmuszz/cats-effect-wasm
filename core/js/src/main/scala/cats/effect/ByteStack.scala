@@ -16,6 +16,8 @@
 
 package cats.effect
 
+import scala.scalajs.LinkingInfo.{linkTimeIf, moduleKind, ModuleKind}
+
 private object ByteStack {
 
   type T = Array[Int]
@@ -29,9 +31,13 @@ private object ByteStack {
     if ((1 + ((count + 1) >> 3)) < stack.length) {
       stack
     } else {
-      val bigger = new Array[Int](stack.length << 1)
-      System.arraycopy(stack, 0, bigger, 0, stack.length) // Count in stack(0) copied "for free"
-      bigger
+      linkTimeIf(moduleKind == ModuleKind.WasmComponent) {
+        val bigger = new Array[Int](stack.length << 1)
+        System.arraycopy(stack, 0, bigger, 0, stack.length) // Count in stack(0) copied "for free"
+        bigger
+      } {
+        stack.appended(0)
+      }
     }
   }
 

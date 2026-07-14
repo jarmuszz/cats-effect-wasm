@@ -123,11 +123,15 @@ final class WasiPollingExecutor(pollEvery: Int, system: PollingSystem.WithPoller
     }
   }
 
+  def registerPollable(pollable: wasi.io.poll.Pollable, cb: () => Unit): Unit = {
+    poller.registerPollable(pollable, cb)
+  }
+
   def monotonicNanos(): Long = wasi.clocks.monotonic_clock.now()
 
   def nowMillis(): Long = {
     val now = wasi.clocks.wall_clock.now()
-    (now.seconds * 10000) + (now.nanoseconds / 1000000)
+    (now.seconds * 1000) + (now.nanoseconds / 1000000)
   }
 
   override def nowMicros(): Long = {

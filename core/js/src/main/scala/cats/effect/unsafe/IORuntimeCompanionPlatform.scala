@@ -58,15 +58,15 @@ private[unsafe] abstract class IORuntimeCompanionPlatform { this: IORuntime.type
 
   def global: IORuntime = {
     if (_global == null) {
-      val (ec, sc) = linkTimeIf(moduleKind == ModuleKind.WasmComponent) {
+      val (ec, sc, pollers) = linkTimeIf(moduleKind == ModuleKind.WasmComponent) {
         val we = WasiPollingExecutor.global
-        (we.asInstanceOf[ExecutionContext], we.asInstanceOf[Scheduler])
+        (we.asInstanceOf[ExecutionContext], we.asInstanceOf[Scheduler], List(we))
       } {
-        (defaultComputeExecutionContext, defaultScheduler)
+        (defaultComputeExecutionContext, defaultScheduler, List.empty)
       }
 
       installGlobal {
-        IORuntime(ec, ec, sc, () => resetGlobal(), IORuntimeConfig())
+        IORuntime(ec, ec, sc, pollers, () => resetGlobal(), IORuntimeConfig())
       }
       ()
     }
