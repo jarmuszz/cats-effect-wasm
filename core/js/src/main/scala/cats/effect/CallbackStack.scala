@@ -177,7 +177,7 @@ private object CallbackStackFactory {
     type StackType[A] = js.Array[A => Unit]
 
     @inline def of[A](cb: A => Unit): StackType[A] =
-      new js.Array[A => Unit]()
+      js.Array[A => Unit](cb)
 
     @inline def ops[A](stack: StackType[A]): CallbackStackOps[A] =
       new JSCallbackStackOps(stack)
