@@ -669,7 +669,6 @@ private final class IOFiber[A](
                 // `wasFinalizing` and `handle` are published
                 if (finalizing == state.wasFinalizing) {
                   if (isStackTracing) {
-                    println(state.handle == null)
                     state.handle.deregister()
                   }
 
