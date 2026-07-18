@@ -19,8 +19,8 @@ package cats.effect
 import scala.scalajs.LinkingInfo.{linkTimeIf, moduleKind, ModuleKind}
 
 private object Platform {
-  final val isJs = linkTimeIf(moduleKind == ModuleKind.WasmComponent)(false)(true)
-  final val isWasi = linkTimeIf(moduleKind == ModuleKind.WasmComponent)(false)(true)
+  final val isJs = moduleKind != ModuleKind.WasmComponent
+  final val isWasi = moduleKind == ModuleKind.WasmComponent
   final val isJvm = false
   final val isNative = false
 
