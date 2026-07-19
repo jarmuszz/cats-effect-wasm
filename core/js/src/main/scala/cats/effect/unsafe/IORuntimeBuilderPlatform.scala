@@ -36,7 +36,10 @@ private[unsafe] abstract class IORuntimeBuilderPlatform { self: IORuntimeBuilder
     val (scheduler, schedulerShutdown) =
       customScheduler.getOrElse((IORuntime.defaultScheduler, defaultShutdown))
     val pollers = linkTimeIf(moduleKind == ModuleKind.WasmComponent) {
-      List(compute.asInstanceOf[WasiPollingExecutor])
+      compute match {
+        case c: WasiPollingExecutor => List(c)
+        case _ => List.empty
+      }
     } {
       List.empty
     }
