@@ -123,9 +123,9 @@ private final class WasiCallbackStack[A](private var callbacks: mutable.LinkedHa
    * iff *any* callbacks were invoked.
    */
   @inline def apply(oc: A): Boolean =
-    callbacks.foldLeft(false) { case (_, (_, cb)) =>
-      if (cb ne null) cb(oc)
-      true
+    callbacks.foldRight(false) { case ((_, cb), acc) =>
+      if (cb ne null) { cb(oc); true }
+      else acc
     }
 
   /**
