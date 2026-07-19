@@ -43,7 +43,7 @@ final class WasiPoller(events: mutable.Queue[wasi.io.poll.Pollable]) {
         }
       }
 
-      if (readyEvents == events) PollResult.Complete
+      if (readyEvents.size == events.size) PollResult.Complete
       else PollResult.Incomplete
     }
 
