@@ -1115,7 +1115,7 @@ private final class IOFiber[A](
 
     /* clear out literally everything to avoid any possible memory leaks */
 
-    conts = null
+    conts = ByteStack.nil
     objectState.invalidate()
     finalizers.invalidate()
     currentCtx = null
