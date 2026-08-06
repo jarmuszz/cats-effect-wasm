@@ -182,7 +182,7 @@ object Console extends ConsoleCompanionCrossPlatform {
       extends Console[F] {
 
     def write(stdout: wasi.cli.stdout.OutputStream, str: String): F[Unit] = {
-      F.pure {
+      F.blocking {
         stdout.write(str.getBytes()) match {
           case _: Ok[?] => ()
           case _: Err[?] => throw new Exception("stdout.write returned err")
