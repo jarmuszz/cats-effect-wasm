@@ -28,7 +28,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js
 import scala.scalajs.LinkingInfo.{linkTimeIf, ModuleKind, moduleKind}
-import scala.scalajs.wasi
+import dev.fixpoint.wasi4s.generated.{p2 => wasi}
 import scala.scalajs.wit
 
 package object examples {

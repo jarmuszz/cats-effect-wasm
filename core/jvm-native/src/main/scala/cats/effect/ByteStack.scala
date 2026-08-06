@@ -24,6 +24,8 @@ private object ByteStack {
 
   type T = Array[Int]
 
+  val nil: T = null
+
   @static final def toDebugString(
       stack: Array[Int],
       translate: Byte => String = _.toString): String = {

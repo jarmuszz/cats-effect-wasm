@@ -221,7 +221,7 @@ trait IOApp {
 
       _runtime = IORuntime.global
 
-      import scala.scalajs.wasi
+      import dev.fixpoint.wasi4s.generated.{p2 => wasi}
       import scala.scalajs.wit
 
       run(args.toList).unsafeRunFiber(

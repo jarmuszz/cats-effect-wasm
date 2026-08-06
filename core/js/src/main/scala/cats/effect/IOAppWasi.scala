@@ -16,7 +16,7 @@
 
 package cats.effect
 import scala.scalajs.wit
-import scala.scalajs.wasi
+import dev.fixpoint.wasi4s.generated.{p2 => wasi}
 
 /**
  * IOApp entrypoint for `wasi:cli/run@0.2.0`

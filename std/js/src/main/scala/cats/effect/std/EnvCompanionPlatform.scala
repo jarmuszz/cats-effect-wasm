@@ -23,7 +23,7 @@ import scala.collection.immutable.Iterable
 import scala.scalajs.js
 import scala.util.Try
 import scalajs.LinkingInfo.{linkTimeIf, moduleKind, ModuleKind}
-import scala.scalajs.wasi
+import dev.fixpoint.wasi4s.generated.{p2 => wasi}
 import scala.scalajs.wit
 import scala.collection.mutable
 import scala.scalajs.WitUtils

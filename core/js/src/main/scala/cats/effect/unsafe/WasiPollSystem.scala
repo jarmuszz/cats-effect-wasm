@@ -2,7 +2,7 @@ package cats.effect.unsafe
 
 import cats.effect.unsafe.metrics.PollerMetrics
 import scala.collection.mutable
-import scala.scalajs.wasi
+import dev.fixpoint.wasi4s.generated.{p2 => wasi}
 
 object WasiPollSystem extends PollingSystem {
 

@@ -36,7 +36,7 @@ import scala.scalajs.js
 import scala.scalajs.js.typedarray._
 
 import scala.scalajs.LinkingInfo.{linkTimeIf, moduleKind, ModuleKind}
-import scala.scalajs.wasi
+import dev.fixpoint.wasi4s.generated.{p2 => wasi}
 
 private[std] trait SecureRandomCompanionPlatform {
   // The seed in java.util.Random will be unused, so set to 0L instead of having to generate one

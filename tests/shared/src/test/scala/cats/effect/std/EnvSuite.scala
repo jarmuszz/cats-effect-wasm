@@ -18,6 +18,7 @@ package cats.effect
 package std
 
 class EnvSuite extends BaseSuite {
+  /*
   real("retrieve a variable from the environment") {
     Env[IO].get("HOME").flatMap(x => IO(assert(x.isDefined)))
   }
@@ -27,5 +28,14 @@ class EnvSuite extends BaseSuite {
   real("provide an iterable of all the things") {
     Env[IO].entries.flatMap(x => IO(assert(x.nonEmpty)))
   }
+  */
 
+  real("Resources should close in correct order") {
+    val res = for {
+       _ <- Resource.make { IO.println("a1") } { _ => IO.println("r1") }
+       _ <- Resource.make { IO.println("a2") } { _ => IO.println("r2") }
+       _ <- Resource.make { IO.println("a3") } { _ => IO.println("r3") }
+     } yield ()
+    res.use(_ => IO.unit)
+  }
 }

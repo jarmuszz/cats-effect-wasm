@@ -863,7 +863,10 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     }
   )
   .jsSettings(
-    libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % MacrotaskExecutorVersion,
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scala-js-macrotask-executor" % MacrotaskExecutorVersion,
+      "dev.fixpoint" %%% "wasi4s" % "0.1.0-SNAPSHOT"
+    ),
 
     mimaBinaryIssueFilters ++= {
       Seq(
@@ -1224,7 +1227,10 @@ lazy val std = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       )
   )
   .jsSettings(
-    libraryDependencies += "org.scala-js" %%% "scala-js-macrotask-executor" % MacrotaskExecutorVersion % Test,
+    libraryDependencies ++= Seq(
+      "org.scala-js" %%% "scala-js-macrotask-executor" % MacrotaskExecutorVersion % Test,
+      "dev.fixpoint" %%% "wasi4s" % "0.1.0-SNAPSHOT"
+    ),
     mimaBinaryIssueFilters ++= Seq(
       // introduced by #2604, Fix Console on JS
       // changes to a static forwarder, which are meaningless on JS

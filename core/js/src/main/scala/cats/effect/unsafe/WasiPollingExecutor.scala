@@ -23,7 +23,7 @@ import org.typelevel.scalaccompat.annotation.{nowarn213, nowarn3}
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, ExecutionContextExecutor}
 import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.scalajs.wasi
+import dev.fixpoint.wasi4s.generated.{p2 => wasi}
 
 import java.util.{PriorityQueue => JPriorityQueue}
 
