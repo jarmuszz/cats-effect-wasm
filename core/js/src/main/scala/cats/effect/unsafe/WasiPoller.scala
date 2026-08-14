@@ -4,10 +4,18 @@ import dev.fixpoint.wasi4s.generated.{p2 => wasi}
 import scala.scalajs.wit
 import scala.collection.mutable
 import scala.concurrent.duration.FiniteDuration
+import scala.collection.compat._
 
-final class WasiPoller(events: mutable.Queue[wasi.io.poll.Pollable]) {
-  val callbacks = mutable.ArrayDeque.empty[() => Unit]
+final class WasiPoller(var events: mutable.Queue[wasi.io.poll.Pollable]) {
+  val callbacks = mutable.ArrayBuffer.empty[() => Unit]
   var readyEvents: Array[Int] = null
+
+  @inline private def removeEvent(idx: Int): Unit = {
+    val (left, right) = events.splitAt(idx)
+    right.dequeue()
+    events = left ++ right
+    ()
+  }
 
   def poll(timeout: Long): PollResult =
     if (events.isEmpty) {
@@ -16,25 +24,24 @@ final class WasiPoller(events: mutable.Queue[wasi.io.poll.Pollable]) {
     } else {
       if (timeout == -1) {
         // Wait indefinitely for ready events
-        readyEvents = wasi.io.poll.poll(events.toArray)
-        readyEvents.sortInPlace()(Ordering.Int.reverse)
+        readyEvents = wasi.io.poll.poll(events.toArray).sorted(Ordering.Int.reverse)
       } else {
         // add an alarm so that we can timeout
         val alarm = wasi.clocks.monotonic_clock.subscribeDuration(timeout)
         events += alarm
         val alarmIdx = events.length - 1
 
-        val processed = wasi.io.poll.poll(events.toArray)
+        var processed = wasi.io.poll.poll(events.toArray)
 
         // We have to sort the array so that we don't change indexes
         // when processing the array later.
-        processed.sortInPlace()(Ordering.Int.reverse)
+        processed = processed.sorted(Ordering.Int.reverse)
 
         /* We have to remove the alarm from events because it shouldn't outlive
          * this poll and fire off later. We also drop its index from `readyEvents`
          * if it got polled.
          */
-        events.removeFirst(_ == alarm)
+        events.dequeueFirst(_ == alarm)
         processed.headOption match {
           case Some(`alarmIdx`) =>
             readyEvents = processed.tail
@@ -54,7 +61,7 @@ final class WasiPoller(events: mutable.Queue[wasi.io.poll.Pollable]) {
       // readyEvents is sorted descending
       readyEvents.foreach { idx =>
         val cb = callbacks.remove(idx)
-        events.remove(idx)
+        removeEvent(idx)
         did = true
         cb()
       }
@@ -68,13 +75,13 @@ final class WasiPoller(events: mutable.Queue[wasi.io.poll.Pollable]) {
   def needsPoll: Boolean = events.length > 0
 
   def registerPollable(pollable: wasi.io.poll.Pollable, cb: () => Unit): Unit = {
-    events.append(pollable)
+    events += pollable
     callbacks.append(cb)
   }
 
   def deregisterPollable(pollable: wasi.io.poll.Pollable): Unit = {
     val idx = events.indexOf(pollable)
-    events.remove(idx)
+    removeEvent(idx)
     callbacks.remove(idx)
     readyEvents = readyEvents.filterNot(_ == idx)
 

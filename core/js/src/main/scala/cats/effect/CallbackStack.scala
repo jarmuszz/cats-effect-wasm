@@ -177,7 +177,7 @@ private[effect] object CallbackStack {
   sealed trait CallbackStackFactory {
     type StackType[A]
     def of[A](cb: A => Unit): StackType[A]
-    implicit def ops[A](stack: StackType[A]): CallbackStackOps[A]
+    def ops[A](stack: StackType[A]): CallbackStackOps[A]
   }
 
   val callbackStackFactory: CallbackStackFactory =

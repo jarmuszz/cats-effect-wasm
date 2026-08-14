@@ -86,7 +86,8 @@ private object JSByteStack extends ByteStackSchema {
     if ((1 + ((count + 1) >> 3)) < stack.length) {
       stack
     } else {
-      stack.appended(0)
+      stack.push(0)
+      stack
     }
   }
 }

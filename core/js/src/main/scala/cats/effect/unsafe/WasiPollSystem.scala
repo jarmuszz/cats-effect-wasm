@@ -15,7 +15,8 @@ object WasiPollSystem extends PollingSystem {
   override def makeApi(ctx: PollingContext[Poller]): Api = ???
 
   override def makePoller(): Poller = {
-    new WasiPoller(new mutable.Queue(initialPollerArraySize))
+    val q = new mutable.Queue[wasi.io.poll.Pollable]()
+    new WasiPoller(q)
   }
 
   override def closePoller(poller: Poller): Unit = ()

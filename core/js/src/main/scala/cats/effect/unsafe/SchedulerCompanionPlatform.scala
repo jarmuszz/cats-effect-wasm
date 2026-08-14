@@ -67,7 +67,7 @@ private[unsafe] abstract class SchedulerCompanionPlatform { this: Scheduler.type
 
   private[this] val nowMicrosImpl: () => Long = {
     LinkingInfo.linkTimeIf(LinkingInfo.moduleKind == LinkingInfo.ModuleKind.WasmComponent) {
-      () => scalajs.wasi.clocks.monotonic_clock.now() / 1_000
+      () => scalajs.wasi.clocks.monotonic_clock.now() / 1000
     } {
       def test(performance: Performance) = {
         // take it for a spin
