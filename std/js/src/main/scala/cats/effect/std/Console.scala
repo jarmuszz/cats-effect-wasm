@@ -23,7 +23,7 @@ import cats.syntax.all._
 import scala.annotation.nowarn
 import scala.scalajs.js
 import scala.util.Try
-import scalajs.wasi
+import dev.fixpoint.wasi4s.generated.p2
 import scalajs.LinkingInfo
 
 import java.nio.charset.Charset
@@ -99,9 +99,9 @@ object Console extends ConsoleCompanionCrossPlatform {
    */
   def make[F[_]](implicit F: Async[F]): Console[F] =
     LinkingInfo.linkTimeIf(LinkingInfo.moduleKind == LinkingInfo.ModuleKind.WasmComponent) {
-      val stdin = wasi.cli.stdin.getStdin()
-      val stdout = wasi.cli.stdout.getStdout()
-      val stderr = wasi.cli.stderr.getStderr()
+      val stdin = p2.cli.stdin.getStdin()
+      val stdout = p2.cli.stdout.getStdout()
+      val stderr = p2.cli.stderr.getStderr()
 
       (new WasiConsole(stdin, stdout, stderr)).asInstanceOf[Console[F]]
     } {
@@ -175,13 +175,13 @@ object Console extends ConsoleCompanionCrossPlatform {
   }
 
   private final class WasiConsole[F[_]](
-      stdin: wasi.cli.stdin.InputStream,
-      stdout: wasi.cli.stdout.OutputStream,
-      stderr: wasi.cli.stderr.OutputStream
+      stdin: p2.cli.stdin.InputStream,
+      stdout: p2.cli.stdout.OutputStream,
+      stderr: p2.cli.stderr.OutputStream
   )(implicit F: Async[F])
       extends Console[F] {
 
-    def write(stdout: wasi.cli.stdout.OutputStream, str: String): F[Unit] = {
+    def write(stdout: p2.cli.stdout.OutputStream, str: String): F[Unit] = {
       F.blocking {
         stdout.write(str.getBytes()) match {
           case _: Ok[?] => ()
@@ -203,13 +203,13 @@ object Console extends ConsoleCompanionCrossPlatform {
             if (head === '\n')
               acc.toString()
             else
-              go(acc.addOne(head))
-          case err: Err[wasi.io.streams.StreamError] =>
+              go(acc += head)
+          case err: Err[p2.io.streams.StreamError] =>
             throw new Exception(s"Stdin read failed because: ${err}")
         }
       }
 
-      F.blocking(go(ArrayBuilder.make))
+      F.blocking(go(ArrayBuilder.make[Byte]))
     }
 
     override def print[A](a: A)(implicit S: Show[A]): F[Unit] = write(stdout, a.show)

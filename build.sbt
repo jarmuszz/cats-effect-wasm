@@ -342,7 +342,7 @@ val CatsVersion = "2.13-WASM"
 val CatsMtlVersion = "1.7-WASM"
 val ScalaCheckVersion = "1.19.0-66-3b1e58f-SNAPSHOT"
 val CoopVersion = "1.3.0"
-val MUnitVersion = "1.3.3-WASM"
+val MUnitVersion = "1.3.5-WASM"
 val MUnitScalaCheckVersion = "1.3.0-WASM"
 val DisciplineMUnitVersion = "2.0-WASM"
 
@@ -865,7 +865,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .jsSettings(
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scala-js-macrotask-executor" % MacrotaskExecutorVersion,
-      "dev.fixpoint" %%% "wasi4s" % "0.1.0-SNAPSHOT"
+      "dev.fixpoint" %%% "wasi4s" % "0.1.0-wasm1-SNAPSHOT",
+      "org.scala-lang.modules" %%% "scala-collection-compat" % "2.14.0"
     ),
 
     mimaBinaryIssueFilters ++= {
@@ -1229,7 +1230,7 @@ lazy val std = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .jsSettings(
     libraryDependencies ++= Seq(
       "org.scala-js" %%% "scala-js-macrotask-executor" % MacrotaskExecutorVersion % Test,
-      "dev.fixpoint" %%% "wasi4s" % "0.1.0-SNAPSHOT"
+      "dev.fixpoint" %%% "wasi4s" % "0.1.0-wasm1-SNAPSHOT"
     ),
     mimaBinaryIssueFilters ++= Seq(
       // introduced by #2604, Fix Console on JS
