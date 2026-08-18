@@ -123,9 +123,11 @@ final class WasiPollingExecutor(pollEvery: Int, system: PollingSystem.WithPoller
     }
   }
 
-  def registerPollable(pollable: wasi.io.poll.Pollable, cb: () => Unit): Unit = {
+  def registerPollable(pollable: wasi.io.poll.Pollable, cb: () => Unit): Unit =
     poller.registerPollable(pollable, cb)
-  }
+
+  def deregisterPollable(pollable: wasi.io.poll.Pollable): Unit =
+    poller.deregisterPollable(pollable)
 
   def monotonicNanos(): Long = wasi.clocks.monotonic_clock.now()
 
