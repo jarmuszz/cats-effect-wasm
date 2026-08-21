@@ -48,6 +48,7 @@ final class WasiPoller(var events: mutable.Queue[wasi.io.poll.Pollable]) {
           case _ =>
             readyEvents = processed
         }
+        alarm.close()
       }
 
       if (readyEvents.size == events.size) PollResult.Complete
