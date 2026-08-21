@@ -82,10 +82,11 @@ final class WasiPoller(var events: mutable.Queue[wasi.io.poll.Pollable]) {
 
   def deregisterPollable(pollable: wasi.io.poll.Pollable): Unit = {
     val idx = events.indexOf(pollable)
-    removeEvent(idx)
-    callbacks.remove(idx)
-    readyEvents = readyEvents.filterNot(_ == idx)
 
-    ()
+    if (idx != -1) {
+      removeEvent(idx)
+      callbacks.remove(idx)
+      if (readyEvents ne null) readyEvents = readyEvents.filterNot(_ == idx)
+    }
   }
 }
