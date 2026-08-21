@@ -26,6 +26,7 @@ import scala.concurrent.duration.{Duration, FiniteDuration}
 import dev.fixpoint.wasi4s.generated.{p2 => wasi}
 
 import java.util.{PriorityQueue => JPriorityQueue}
+import scala.annotation.tailrec
 
 final class WasiPollingExecutor(pollEvery: Int, system: PollingSystem.WithPoller[WasiPoller], reportFailure0: Throwable => Unit = _.printStackTrace())
     extends ExecutionContextExecutor
@@ -85,9 +86,15 @@ final class WasiPollingExecutor(pollEvery: Int, system: PollingSystem.WithPoller
         else
           -1
 
-      while (system.needsPoll(poller)) {
-        poller.poll(timeout)
+      @tailrec def go(result: PollResult, count: Int): Unit = {
         system.processReadyEvents(poller)
+        if (count < 64) { // take a break sometimes so we can cancel
+          if (result eq PollResult.Incomplete) go(system.poll(poller, 0), count + 1)
+        }
+      }
+
+      if (system.needsPoll(poller) || timeout != -1) {
+        go(system.poll(poller, timeout), 0)
       }
 
       continue = !executeQueue.isEmpty || !sleepQueue.isEmpty || system.needsPoll(poller)
