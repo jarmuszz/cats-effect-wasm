@@ -78,23 +78,17 @@ final class WasiPollingExecutor(pollEvery: Int, system: PollingSystem.WithPoller
       }
 
       // 3. poll
-      val timeout =
-        if (!executeQueue.isEmpty)
-          0
-        else if (!sleepQueue.isEmpty())
-          Math.max(sleepQueue.peek().at - monotonicNanos(), 0)
-        else
-          -1
+      if (system.needsPoll(poller)) {
+        val timeout =
+          if (!executeQueue.isEmpty)
+            0
+          else if (!sleepQueue.isEmpty())
+            Math.max(sleepQueue.peek().at - monotonicNanos(), 0)
+          else
+            -1
 
-      @tailrec def go(result: PollResult, count: Int): Unit = {
+        system.poll(poller, timeout)
         system.processReadyEvents(poller)
-        if (count < 64) { // take a break sometimes so we can cancel
-          if (result eq PollResult.Incomplete) go(system.poll(poller, 0), count + 1)
-        }
-      }
-
-      if (system.needsPoll(poller) || timeout != -1) {
-        go(system.poll(poller, timeout), 0)
       }
 
       continue = !executeQueue.isEmpty || !sleepQueue.isEmpty || system.needsPoll(poller)
